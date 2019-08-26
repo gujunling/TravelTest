@@ -134,7 +134,6 @@
                     <configuration>
                         <target>1.8</target>
                         <source>1.8</source>
-                        <fork>true</fork>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
@@ -151,13 +150,10 @@
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.0.2</version>
                 </plugin>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.7.0</version>
-                </plugin>
+
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.20.1</version>
+                    <version>2.19.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-war-plugin</artifactId>
