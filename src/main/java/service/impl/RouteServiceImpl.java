@@ -1,8 +1,10 @@
 package service.impl;
 
+import dao.FavoriteDao;
 import dao.RouteDao;
 import dao.RouteImgDao;
 import dao.SellerDao;
+import dao.impl.FavoriteDaoImpl;
 import dao.impl.RouteDaoImpl;
 import dao.impl.RouteImgDaoImpl;
 import dao.impl.SellerDaoImpl;
@@ -25,6 +27,8 @@ public class RouteServiceImpl implements RouteService {
     private RouteImgDao routeImgDao = new RouteImgDaoImpl();
 
     private SellerDao sellerDao = new SellerDaoImpl();
+
+    private FavoriteDao favoriteDao = new FavoriteDaoImpl();
 
     @Override
     public PageBean<Route> pageQuery(int cid, int currentPage, int pageSize, String rname) {
@@ -64,6 +68,8 @@ public class RouteServiceImpl implements RouteService {
         //根据route的sid查询商家信息
         Seller seller = sellerDao.findById(route.getSid());
         route.setSeller(seller);
+        int count = favoriteDao.findCountByRid(route.getRid());
+        route.setCount(count);
 
         return route;
     }
@@ -82,11 +88,11 @@ public class RouteServiceImpl implements RouteService {
         pb.setTotalCount(totalCount);
         //设置当前页显示的数据集合
         int start = (currentPage - 1) * pageSize;//开始的记录数
-        List<Route> list = routeDao.findByPageAll(cid,start,pageSize);
+        List<Route> list = routeDao.findByPageAll(cid, start, pageSize);
         pb.setList(list);
 
         //设置总页数 = 总记录数/每页显示条数
-        int totalPage = totalCount % pageSize == 0 ? totalCount / pageSize :(totalCount / pageSize) + 1 ;
+        int totalPage = totalCount % pageSize == 0 ? totalCount / pageSize : (totalCount / pageSize) + 1;
         pb.setTotalPage(totalPage);
 
 

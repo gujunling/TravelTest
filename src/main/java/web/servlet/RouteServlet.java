@@ -2,7 +2,10 @@ package web.servlet;
 
 import domain.PageBean;
 import domain.Route;
+import domain.User;
+import service.FavoriteService;
 import service.RouteService;
+import service.impl.FavoriteServiceImpl;
 import service.impl.RouteServiceImpl;
 import util.JDBCUtils;
 
@@ -21,6 +24,8 @@ import java.io.IOException;
 public class RouteServlet extends BaseServlet {
 
     private RouteService service = new RouteServiceImpl();
+
+    private FavoriteService favoriteService = new FavoriteServiceImpl();
 
     /**
      * 分页查询
@@ -73,6 +78,7 @@ public class RouteServlet extends BaseServlet {
 
 
     }
+
     public void pageQueryAll(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         //1.接受参数
@@ -82,20 +88,20 @@ public class RouteServlet extends BaseServlet {
 
         int cid = 0;//类别id
         //2.处理参数
-        if(cidStr != null && cidStr.length() > 0){
+        if (cidStr != null && cidStr.length() > 0) {
             cid = Integer.parseInt(cidStr);
         }
         int currentPage = 0;//当前页码，如果不传递，则默认为第一页
-        if(currentPageStr != null && currentPageStr.length() > 0){
+        if (currentPageStr != null && currentPageStr.length() > 0) {
             currentPage = Integer.parseInt(currentPageStr);
-        }else{
+        } else {
             currentPage = 1;
         }
 
         int pageSize = 0;//每页显示条数，如果不传递，默认每页显示5条记录
-        if(pageSizeStr != null && pageSizeStr.length() > 0){
+        if (pageSizeStr != null && pageSizeStr.length() > 0) {
             pageSize = Integer.parseInt(pageSizeStr);
-        }else{
+        } else {
             pageSize = 5;
         }
 
@@ -103,9 +109,7 @@ public class RouteServlet extends BaseServlet {
         PageBean<Route> pb = service.pageQueryAll(cid, currentPage, pageSize);
 
         //4. 将pageBean对象序列化为json，返回
-        writeValue(pb,response);
-
-
+        writeValue(pb, response);
 
     }
 
@@ -127,7 +131,66 @@ public class RouteServlet extends BaseServlet {
 
         //转换为json返回客户端
         writeValue(route, response);
+    }
+
+    /**
+     * 判断当前登录用户是否收藏该路线
+     *
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void isFavorite(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        //获取线路id
+        String rid = request.getParameter("rid");
+        //获取当前登录的用户user
+        User user = (User) request.getSession().getAttribute("user");
+
+        int uid;  //用户id
+        if (user == null) {
+            //用户未登录
+            return;
+        } else {
+            //用户登录
+            uid = user.getUid();
+        }
+
+        //调用service查询是否收藏
+        boolean flag = favoriteService.isFavorite(rid, uid);
+
+        //写回客户端
+        writeValue(flag, response);
+
+    }
 
 
+    /**
+     * 添加收藏
+     *
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void addFavorite(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        //获取线路id
+        String rid = request.getParameter("rid");
+        //获取当前登录的用户user
+        User user = (User) request.getSession().getAttribute("user");
+
+        int uid;  //用户id
+        if (user == null) {
+            //用户未登录
+            return;
+        } else {
+            //用户登录
+            uid = user.getUid();
+        }
+
+        //调用service添加收藏
+        favoriteService.add(rid, uid);
     }
 }
